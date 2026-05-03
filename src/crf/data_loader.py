@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 def load_data(file_path):
     dataframe = pd.read_csv(file_path)
     dataframe["words"] = dataframe["words"].apply(split_data)

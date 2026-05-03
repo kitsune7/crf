@@ -5,7 +5,10 @@ description = "A new Python project"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+  "numpy>=2.4.4",
   "pandas>=3.0.2",
+  "scikit-learn>=1.8.0",
+  "scipy>=1.17.1",
 ]
 
 [project.scripts]
@@ -29,4 +32,13 @@ line-length = 120
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W"]
+
+# These files use conventional mathematical names (X for feature matrix,
+# V for Viterbi table, log_Z for the log partition function) that match the
+# CRF/ML literature. Keep them as-is.
+[tool.ruff.lint.per-file-ignores]
+"src/crf/baseline.py" = ["N806"]
+"src/crf/inference.py" = ["N806", "N815"]
+"src/crf/train.py" = ["N803", "N806"]
+"src/tests/test_inference.py" = ["N802", "N806"]
 
