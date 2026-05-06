@@ -1,14 +1,14 @@
 """
 Command-line interface for training and evaluating the CRF and baseline.
 
-Usage examples::
+Usage examples:
 
     uv run crf label-stats
     uv run crf baseline --min-count 2
     uv run crf train --max-iters 30 --min-count 2
     uv run crf train --subset 500 --max-iters 50  # quick dev loop
 
-All commands load data from ``data/lid_spaeng_*.csv`` by default.
+All commands load data from `data/lid_spaeng_*.csv` by default.
 """
 
 import argparse
@@ -34,7 +34,7 @@ def _maybe_subset(sentences: Sequence[dict], subset: int | None) -> list[dict]:
     return list(sentences[:subset])
 
 
-# --------------------------------------------------------------------- commands
+# --- Commands ---
 
 def cmd_label_stats(_args: argparse.Namespace) -> int:
     splits = _load_splits()
@@ -53,7 +53,7 @@ def cmd_label_stats(_args: argparse.Namespace) -> int:
 def cmd_baseline(args: argparse.Namespace) -> int:
     splits = _load_splits()
     train_data = _maybe_subset(splits["train"], args.subset)
-    print(f"training LR baseline on {len(train_data)} sentences")
+    print(f"training MEMM baseline on {len(train_data)} sentences")
     start = time.time()
     model = train_baseline(train_data, min_count=args.min_count, max_iter=args.max_iter)
     print(f"  done in {time.time() - start:.1f}s  (features={model.n_features})")
@@ -102,7 +102,7 @@ def cmd_train(args: argparse.Namespace) -> int:
     return 0
 
 
-# --------------------------------------------------------------------- wiring
+# --- Wiring ---
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="CRF for LinCE LID_spaeng")
@@ -111,7 +111,7 @@ def _build_parser() -> argparse.ArgumentParser:
     label_stats = sub.add_parser("label-stats", help="print label distributions per split")
     label_stats.set_defaults(func=cmd_label_stats)
 
-    baseline = sub.add_parser("baseline", help="train the LR baseline and report metrics")
+    baseline = sub.add_parser("baseline", help="train the MEMM baseline and report metrics")
     baseline.add_argument("--subset", type=int, default=None, help="use only the first N training sentences")
     baseline.add_argument("--min-count", type=int, default=2)
     baseline.add_argument("--max-iter", type=int, default=200)
@@ -120,7 +120,7 @@ def _build_parser() -> argparse.ArgumentParser:
     train_cmd = sub.add_parser("train", help="train the CRF with Algorithm S")
     train_cmd.add_argument("--subset", type=int, default=None, help="use only the first N training sentences")
     train_cmd.add_argument("--min-count", type=int, default=2)
-    train_cmd.add_argument("--max-iters", type=int, default=50)
+    train_cmd.add_argument("--max-iters", type=int, default=200)
     train_cmd.set_defaults(func=cmd_train)
 
     return parser

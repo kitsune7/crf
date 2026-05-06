@@ -5,8 +5,8 @@ The intuition in one paragraph
 ------------------------------
 For every feature we want to learn a weight for, we compute two numbers:
 
-* ``observed[k]`` — how often the feature fired on the *gold* labels.
-* ``expected[k]`` — how often the feature fires *in expectation* under the
+* `observed[k]` — how often the feature fired on the *gold* labels.
+* `expected[k]` — how often the feature fires *in expectation* under the
   current model (weighting each possible labeling by its probability).
 
 If observed > expected, the model under-uses the feature → push its weight up.
@@ -17,7 +17,7 @@ Update rule::
 
     weight[k] += (1 / S) * log(observed[k] / expected[k])
 
-``S`` is a scaling constant chosen so the algorithm is guaranteed to move in
+`S` is a scaling constant chosen so the algorithm is guaranteed to move in
 the right direction; any value that upper-bounds the total active-feature
 count per sentence works.
 
@@ -26,10 +26,10 @@ What we accumulate separately
 We keep four parallel "weight vectors" and update each of them with their own
 observed/expected counts:
 
-* ``emission_weights[k, v]`` — observation feature k firing with label v.
-* ``transition_weights[u, v]`` — jumping from u to v.
-* ``start_weights[v]`` — starting a sentence with v.
-* ``stop_weights[u]`` — ending a sentence with u.
+* `emission_weights[k, v]` — observation feature k firing with label v.
+* `transition_weights[u, v]` — jumping from u to v.
+* `start_weights[v]` — starting a sentence with v.
+* `stop_weights[u]` — ending a sentence with u.
 
 Each of the four has its own observed- and expected-count arrays of matching
 shape. The bookkeeping is mostly "sum probabilities into the right bucket."
@@ -125,7 +125,7 @@ def compute_expected_counts_and_loglik(
     """
     Expected feature firings under the current model, plus total log-likelihood.
 
-    We reuse the ``ObservedCounts`` dataclass as a container — it has the
+    We reuse the `ObservedCounts` dataclass as a container — it has the
     right shape — even though these are expected rather than observed counts.
 
     Log-likelihood is returned too because we need it to track convergence:
@@ -186,7 +186,7 @@ def _algorithm_s_update(
     """
     Apply the Algorithm S update in-place.
 
-    Features that never fire on gold labels (``observed == 0``) can't learn
+    Features that never fire on gold labels (`observed == 0`) can't learn
     anything useful — the log would blow up — so we skip them.
     """
     active = observed > 0
@@ -205,7 +205,7 @@ class TrainingHistory:
 
 def choose_scaling_constant(encoded: Sequence[EncodedSentence]) -> float:
     """
-    Pick ``S`` big enough to guarantee Algorithm S converges.
+    Pick `S` big enough to guarantee Algorithm S converges.
 
     The safe choice is an upper bound on the total number of active features
     any single sentence contributes. Sentence contributes:
@@ -235,8 +235,8 @@ def train(
     """
     Train a CRF with Algorithm S.
 
-    Stops when the relative improvement in log-likelihood drops below ``tol``
-    for two iterations in a row, or after ``max_iters`` iterations.
+    Stops when the relative improvement in log-likelihood drops below `tol`
+    for two iterations in a row, or after `max_iters` iterations.
     """
     params = CRFParameters.zeros(vocab)
     observed = compute_observed_counts(vocab, encoded)

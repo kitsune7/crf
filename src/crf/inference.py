@@ -5,28 +5,28 @@ Model parameters
 ----------------
 A CRF has three kinds of weights:
 
-* ``emission_weights`` — shape ``(n_observations, n_real_labels)``. For every
-  active observation feature `k` at position `i`, we add ``emission_weights[k, v]``
+* `emission_weights` — shape `(n_observations, n_real_labels)`. For every
+  active observation feature `k` at position `i`, we add `emission_weights[k, v]`
   to the score of assigning label `v` at position `i`.
-* ``transition_weights`` — shape ``(R, R)`` where R = number of real labels.
-  ``transition_weights[u, v]`` scores the jump from label ``u`` at position
-  ``i-1`` to label ``v`` at position ``i``. This is what lets the CRF learn
+* `transition_weights` — shape `(R, R)` where R = number of real labels.
+  `transition_weights[u, v]` scores the jump from label `u` at position
+  `i-1` to label `v` at position `i`. This is what lets the CRF learn
   "lang2 tends to follow lang2" — something a per-token classifier can't see.
-* ``start_weights`` / ``stop_weights`` — shape ``(R,)`` each. Boundary
-  "transition" scores: ``start_weights[v]`` is the cost of starting a sentence
-  with label ``v``; ``stop_weights[u]`` is the cost of ending with label ``u``.
+* `start_weights` / `stop_weights` — shape `(R,)` each. Boundary
+  "transition" scores: `start_weights[v]` is the cost of starting a sentence
+  with label `v`; `stop_weights[u]` is the cost of ending with label `u`.
   Keeping them separate (instead of folding START/STOP into the transition
-  matrix) lets every ``log_M`` matrix have a uniform (R, R) shape.
+  matrix) lets every `log_M` matrix have a uniform (R, R) shape.
 
 Positions and indexing
 ----------------------
-Positions are 0-indexed over the sentence. For a length-``n`` sentence:
+Positions are 0-indexed over the sentence. For a length-`n` sentence:
 
 * position 0 … n-1 emit real labels
 * the START sentinel lives conceptually "before" position 0
 * the STOP  sentinel lives conceptually "after" position n-1
 
-Total score of a labeling ``y = (y_0, ..., y_{n-1})``:
+Total score of a labeling `y = (y_0, ..., y_{n-1})`:
 
 ::
 
@@ -77,9 +77,9 @@ def compute_emission_scores(
     """
     Emission score for every (position, real-label) pair.
 
-    Returns an array of shape ``(n, R)`` where entry ``[i, v]`` is the sum of
-    ``emission_weights[k, v]`` across every active observation feature ``k`` at
-    position ``i``. This is the "how well does this word match label v" term.
+    Returns an array of shape `(n, R)` where entry `[i, v]` is the sum of
+    `emission_weights[k, v]` across every active observation feature `k` at
+    position `i`. This is the "how well does this word match label v" term.
     """
     n = len(observation_ids_per_position)
     n_real = params.emission_weights.shape[1]
@@ -117,13 +117,13 @@ def viterbi(
     """
     Find the highest-scoring labeling for a sentence.
 
-    Returns ``(best_labels, best_score)`` where ``best_labels`` is a list of
-    real-label IDs of length ``n``.
+    Returns `(best_labels, best_score)` where `best_labels` is a list of
+    real-label IDs of length `n`.
 
-    The algorithm is classical DP: at each position, remember the best score
-    of any path ending in each possible label, plus a backpointer to the
-    label at the previous position that achieved that best score. At the end
-    we follow the backpointers from the best final state back to position 0.
+    The algorithm is classical dynamic programming: at each position, remember
+    the best score of any path ending in each possible label, plus a backpointer
+    to the label at the previous position that achieved that best score. At the
+    end, we follow the backpointers from the best final state back to position 0.
     """
     n, n_real = emission_scores.shape
     # V[i, v] = best score of any path ending at label v at position i.
@@ -173,13 +173,13 @@ def forward_backward(
     """
     Log-space forward-backward.
 
-    ``log_alpha[i, v]`` = log of the total score of all paths from START to
-    position ``i`` ending at label ``v``.
+    `log_alpha[i, v]` = log of the total score of all paths from START to
+    position `i` ending at label `v`.
 
-    ``log_beta[i, u]``  = log of the total score of all paths from position
-    ``i`` (starting at label ``u``) to STOP.
+    `log_beta[i, u]`  = log of the total score of all paths from position
+    `i` (starting at label `u`) to STOP.
 
-    ``log_Z`` is the log partition function — the normaliser that turns
+    `log_Z` is the log partition function — the normaliser that turns
     path-scores into probabilities.
     """
     n, n_real = emission_scores.shape
@@ -225,9 +225,9 @@ def pairwise_marginals(
     fb: ForwardBackward,
 ) -> np.ndarray:
     """
-    ``p(y_{i-1}=u, y_i=v | x)`` for every transition i=1..n-1.
+    `p(y_{i-1}=u, y_i=v | x)` for every transition i=1..n-1.
 
-    Returns an array of shape ``(n-1, R, R)`` of probabilities (not logs).
+    Returns an array of shape `(n-1, R, R)` of probabilities (not logs).
     Used during Algorithm S training to compute expected transition counts.
     """
     n = fb.log_alpha.shape[0]
@@ -253,18 +253,18 @@ def pairwise_marginals(
 
 def unary_marginals(fb: ForwardBackward) -> np.ndarray:
     """
-    ``p(y_i = v | x)`` for every position i. Shape ``(n, R)``.
+    `p(y_i = v | x)` for every position i. Shape `(n, R)`.
     """
     return np.exp(fb.log_alpha + fb.log_beta - fb.log_Z)
 
 
 def start_marginals(params: CRFParameters, fb: ForwardBackward) -> np.ndarray:
-    """``p(y_0 = v | x)`` — probability the first label is v. Shape ``(R,)``."""
+    """`p(y_0 = v | x)` — probability the first label is v. Shape `(R,)`."""
     return np.exp(
         params.start_weights + fb.emission_scores[0] + fb.log_beta[0] - fb.log_Z
     )
 
 
 def stop_marginals(params: CRFParameters, fb: ForwardBackward) -> np.ndarray:
-    """``p(y_{n-1} = u | x)`` — probability the last label is u. Shape ``(R,)``."""
+    """`p(y_{n-1} = u | x)` — probability the last label is u. Shape `(R,)`."""
     return np.exp(fb.log_alpha[-1] + params.stop_weights - fb.log_Z)

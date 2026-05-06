@@ -1,7 +1,7 @@
 """
 Tests for the CRF inference engine.
 
-The single most important test here is ``test_log_Z_consistency`` — the plan
+The single most important test here is `test_log_Z_consistency` — the plan
 calls it out as the thing that catches 90% of forward-backward bugs. If that
 passes, the rest of the machinery (Viterbi, marginals, training) has solid
 ground to stand on.
